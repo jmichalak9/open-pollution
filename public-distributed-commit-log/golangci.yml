@@ -1,0 +1,37 @@
+service:
+  golangci-lint-version: 1.40.1
+
+run:
+  concurrency: 2
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  skip-dirs:
+  skip-files:
+  modules-download-mode: readonly
+  allow-parallel-runners: false
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+  uniq-by-line: true
+  path-prefix: ""
+  sort-results: true
+
+linters:
+  enable:
+    - gofumpt
+    - govet
+    - revive
+    - dupl
+    - goconst
+    - misspell
+    - unused
+    - nakedret
+    - structcheck
+    - deadcode
+  disable:
+    - megacheck
+    - errcheck
+  fast: true
