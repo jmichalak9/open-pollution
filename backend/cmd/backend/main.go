@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/jmichalak9/open-pollution/server"
+	"github.com/jmichalak9/open-pollution/server/measurement"
 )
 
 const (
@@ -15,7 +16,8 @@ const (
 
 func main() {
 	address := mustGetEnv(addressEnv)
-	srv := server.NewServer(address)
+	measurementCache := measurement.NewInMemoryCache(measurement.ExampleMeasurements)
+	srv := server.NewServer(address, measurementCache)
 	err := srv.Run()
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatal().Err(err).Msg("server failed")

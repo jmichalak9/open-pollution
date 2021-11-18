@@ -11,4 +11,13 @@ lint:
 run:
 	ADDRESS="127.0.0.1:8000" go run cmd/backend/main.go
 
-.PHONY: install-go-tools format lint run
+test:
+	go test -v ./...
+
+coverage_profile:
+	go test -v -coverpkg=./... -coverprofile=profile.coverprofile ./...
+
+show_coverage:
+	go tool cover -html profile.coverprofile
+
+.PHONY: install-go-tools format lint run coverage_profile show_coverage
