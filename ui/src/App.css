@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  height: 100%;
+  width: 100%;
 }
 
 .App-logo {
@@ -35,4 +37,21 @@
   to {
     transform: rotate(360deg);
   }
+}
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  position: relative;
+}
+.Map {
+  width: 80%;
+  height: 80%;
+}
+#root, html, body {
+  height: 100%;
+}
+
+.LeftPanel {
+  width: 20%;
 }
