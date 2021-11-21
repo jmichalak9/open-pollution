@@ -4,6 +4,8 @@ go 1.17
 
 require (
 	github.com/golangci/golangci-lint v1.43.0
+	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/gomega v1.16.0
 	github.com/rs/zerolog v1.26.0
 	mvdan.cc/gofumpt v0.1.1
 )
@@ -96,6 +98,7 @@ require (
 	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
 	github.com/nishanths/exhaustive v0.2.3 // indirect
 	github.com/nishanths/predeclared v0.2.1 // indirect
+	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/phayes/checkstyle v0.0.0-20170904204023-bfd46e6a821d // indirect
@@ -138,12 +141,14 @@ require (
 	github.com/uudashr/gocognit v1.0.5 // indirect
 	github.com/yeya24/promlinter v0.1.0 // indirect
 	golang.org/x/mod v0.5.0 // indirect
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
+	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	honnef.co/go/tools v0.2.1 // indirect
