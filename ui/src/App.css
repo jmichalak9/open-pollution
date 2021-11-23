@@ -1,57 +1,102 @@
+:root{
+  --panel: #212936;
+  --background: #2b3648;
+  --font: #ffffff;
+  --active: #2b3648;
+  --accent: #1976d2;
+}
+
 .App {
-  text-align: center;
-  height: 100%;
   width: 100%;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  height: 100%;
 }
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  font-size: calc(3px + 2vmin);
 }
 
-.App-link {
-  color: #61dafb;
-}
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 .leaflet-container {
   width: 100%;
   height: 100%;
   z-index: 1;
   position: relative;
 }
+
 .Map {
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: 500px;
 }
-#root, html, body {
+
+html, body, #root {
   height: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--font) !important;
+  background: var(--background);
 }
 
 .LeftPanel {
+  height: 100%;
   width: 20%;
+  float: left;
+  background-color: var(--panel);
+  text-align: center;
+
+}
+
+.Container {
+  float: left;
+  width: 80%;
+  background-color: var(--background);
+}
+
+.CenterElements {
+  margin: 21.5px auto 0 auto;
+  width: 80%;
+}
+
+.MenuLine {
+  border: 4px solid var(--background)
+}
+
+.SideNav {
+  margin: 20px auto 0 auto;
+  width: 80%;
+}
+
+.SideNav a {
+  padding: 6px 6px 6px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  text-align: left;
+  color: var(--accent);
+  background: var(--background);
+  border-radius: 15px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.SideNav a:hover {
+  color: #f1f1f1;
+}
+
+.DetailsFlexPanel {
+  float: left;
+  width: 50%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.DetailsFlexPanel div {
+  flex: 50%;
+}
+
+.DetailView {
+  font-size: 1.25em;
 }
