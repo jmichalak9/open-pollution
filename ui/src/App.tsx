@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
 import LeftPanel from './LeftPanel/LeftPanel';
-import Map from './Map/Map';
+import Map, {MapData} from './Map/Map';
 
 import logo from './logo.svg';
 import './App.css';
@@ -40,7 +40,9 @@ const mockDetails = {
 function App() {
   // @ts-ignore
   const [details, setDetails] = useState(mockDetails);
-  const [measurements, setMeasurements] = useState(mockMeasurements);
+  const [measurements, setMeasurements] = useState<MapData>( {
+    measurements: [] as Measurement[]
+  });
 
   function updateDetailsView(measurement: Measurement) {
     const details = {
@@ -78,9 +80,18 @@ function App() {
   return (
     <div className="App">
       <LeftPanel/>
-      <Map mapData = {measurements} onMarkerClick={updateDetailsView}/>
-      <DetailView mapData={details}/>
+      <div className="Container">
+        <div className="CenterElements">
+          <Map mapData = {measurements} onMarkerClick={updateDetailsView}/>
+          <div className="Details">
+            <h1>Szczegóły pomiaru</h1>
+            <hr />
+            <DetailView mapData={details}/>
+          </div>
+        </div>
+      </div>
     </div>
+
   );
 }
 
