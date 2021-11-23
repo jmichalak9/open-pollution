@@ -12,8 +12,7 @@ interface measurementFromAPI {
 }
 
 export async function getMeasurements(callback: Function) {
-  // @ts-ignore
-  const response = await axios.request<measurementsAPIResponse>({
+  await axios.request<measurementsAPIResponse>({
     url: backendURL + measurementsPath
   }).catch(err =>
     console.log(err)

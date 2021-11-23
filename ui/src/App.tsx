@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import LeftPanel from './LeftPanel/LeftPanel';
 import Map, {MapData} from './Map/Map';
 
-import logo from './logo.svg';
 import './App.css';
 import DetailView from "./DetailView/DetailView";
 import {Measurement} from "./Measurement/Measurement";
@@ -16,21 +15,6 @@ const mockMeasurement1: Measurement = {
     lat: 52.2,
     long: 21.0,
   }
-};
-
-const mockMeasurement2: Measurement = {
-  temperature: 42,
-  levelPM10: 33.3,
-  levelPM25:30,
-  levelSO2: 22,
-  position: {
-    lat: 52.22,
-    long: 21.01,
-  }
-};
-
-const mockMeasurements = {
-  measurements: [mockMeasurement1, mockMeasurement2],
 };
 
 const mockDetails = {
@@ -68,15 +52,6 @@ function App() {
     setInterval(getMeasurementsClosure(), 3000);
   },[]);
 
-  async function loadData() {
-    try {
-      const res = await fetch('https://example.com');
-      const blocks = await res;//.json();
-      console.log(blocks)
-    } catch (e) {
-      console.log(e);
-    }
-  }
   return (
     <div className="App">
       <LeftPanel/>

@@ -1,5 +1,5 @@
-import React, { FC, } from 'react';
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import React from 'react';
+import { MapContainer, Marker, TileLayer } from 'react-leaflet';
 import { Measurement} from '../Measurement/Measurement';
 
 export interface MapData {
