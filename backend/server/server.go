@@ -33,6 +33,7 @@ func NewServer(address string, measurementCache measurement.Cache) *Server {
 func (s *Server) handleMeasurements() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		err := json.NewEncoder(w).Encode(s.measurementCache.GetMeasurements())
 		if err != nil {
 			log.Info().Err(err).Msg("encoding response")

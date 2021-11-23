@@ -9,7 +9,7 @@ import (
 type Measurement struct {
 	Position  Position  `json:"position"`
 	Timestamp time.Time `json:"timestamp"`
-	O2        int       `json:"o2"`
+	O3        int       `json:"levelO3"`
 }
 
 type Position struct {
@@ -20,35 +20,35 @@ type Position struct {
 var ExampleMeasurements = []Measurement{
 	{
 		Position: Position{
-			Lat:  21.37,
-			Long: 42.69,
+			Lat:  52.2,
+			Long: 21.0,
 		},
 		Timestamp: mustTimeParse(time.RFC3339, "2021-10-10T15:00:00Z"),
-		O2:        80,
+		O3:        80,
 	},
 	{
 		Position: Position{
-			Lat:  21.38,
-			Long: 42.67,
+			Lat:  52.3,
+			Long: 21.0,
 		},
 		Timestamp: mustTimeParse(time.RFC3339, "2021-10-10T15:00:02Z"),
-		O2:        70,
+		O3:        70,
 	},
 	{
 		Position: Position{
-			Lat:  21.37,
-			Long: 42.70,
+			Lat:  52.25,
+			Long: 21.0,
 		},
 		Timestamp: mustTimeParse(time.RFC3339, "2021-10-10T15:00:01Z"),
-		O2:        82,
+		O3:        82,
 	},
 	{
 		Position: Position{
-			Lat:  21.39,
-			Long: 42.69,
+			Lat:  52.2,
+			Long: 21.2,
 		},
 		Timestamp: mustTimeParse(time.RFC3339, "2021-10-10T14:00:00Z"),
-		O2:        81,
+		O3:        81,
 	},
 }
 

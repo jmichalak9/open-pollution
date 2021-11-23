@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import LeftPanel from './LeftPanel/LeftPanel';
 import Map from './Map/Map';
@@ -7,6 +7,7 @@ import logo from './logo.svg';
 import './App.css';
 import DetailView from "./DetailView/DetailView";
 import {Measurement} from "./Measurement/Measurement";
+import {getMeasurements} from "./APIClient/APIClient";
 
 const mockMeasurement1: Measurement = {
   temperature: 42,
@@ -39,6 +40,7 @@ const mockDetails = {
 function App() {
   // @ts-ignore
   const [details, setDetails] = useState(mockDetails);
+  const [measurements, setMeasurements] = useState(mockMeasurements);
 
   function updateDetailsView(measurement: Measurement) {
     const details = {
@@ -47,10 +49,36 @@ function App() {
     setDetails(details);
     console.log(measurement);
   }
+  function getMeasurementsClosure(): Function {
+    let x = ()=> {
+      getMeasurements((m: Measurement[]) => {
+        console.log("APP.tsx: ", m);
+        const measurements = {
+          measurements: m,
+        }
+        setMeasurements(measurements);
+      });
+    };
+    return x;
+  }
+  useEffect(() => {
+    getMeasurementsClosure();
+    setInterval(getMeasurementsClosure(), 3000);
+  },[]);
+
+  async function loadData() {
+    try {
+      const res = await fetch('https://example.com');
+      const blocks = await res;//.json();
+      console.log(blocks)
+    } catch (e) {
+      console.log(e);
+    }
+  }
   return (
     <div className="App">
       <LeftPanel/>
-      <Map mapData = {mockMeasurements} onMarkerClick={updateDetailsView}/>
+      <Map mapData = {measurements} onMarkerClick={updateDetailsView}/>
       <DetailView mapData={details}/>
     </div>
   );
