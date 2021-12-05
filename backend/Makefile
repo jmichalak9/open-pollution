@@ -9,7 +9,7 @@ lint:
 	golangci-lint run
 
 run:
-	ADDRESS="127.0.0.1:8000" go run cmd/backend/main.go
+	ADDRESS="127.0.0.1:9000" PDCL_HOST="localhost" PDCL_PORT="8000" go run cmd/backend/main.go
 
 test:
 	go test -v ./...
