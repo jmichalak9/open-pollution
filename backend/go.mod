@@ -10,6 +10,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.17.0
+	github.com/paulmach/orb v0.4.0
 	github.com/rs/zerolog v1.26.0
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1

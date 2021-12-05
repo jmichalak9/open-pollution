@@ -114,7 +114,7 @@ func setupPDCL(cache measurement.Cache, config Config) {
 			if message.Temperature != nil {
 				mes.Temperature = int(*message.Temperature)
 			}
-			cache.AppendMeasurements([]measurement.Measurement{mes})
+			cache.UpdateMeasurements([]measurement.Measurement{mes})
 			log.Info().Msgf("received %+v", mes)
 			return nil
 		}))
