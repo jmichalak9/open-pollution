@@ -4,6 +4,7 @@ install-go-tools:
 
 format:
 	gofumpt -w .
+	gci -w -local github.com/jmichalak9/open-pollution . 1>/dev/null
 
 lint:
 	golangci-lint run

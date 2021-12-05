@@ -9,13 +9,12 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/areknoster/public-distributed-commit-log/cmd/openpollution/pb"
 	"github.com/areknoster/public-distributed-commit-log/consumer"
-	"github.com/areknoster/public-distributed-commit-log/head/memory"
-	"github.com/areknoster/public-distributed-commit-log/head/sentinel_reader"
 	"github.com/areknoster/public-distributed-commit-log/sentinel/sentinelpb"
 	"github.com/areknoster/public-distributed-commit-log/storage"
 	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
+	"github.com/areknoster/public-distributed-commit-log/thead/memory"
+	"github.com/areknoster/public-distributed-commit-log/thead/sentinel_reader"
 	"github.com/ipfs/go-cid"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
@@ -107,5 +106,4 @@ func setupPDCL(cache measurement.Cache, config Config) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("consuming messages")
 	}
-
 }
