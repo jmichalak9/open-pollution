@@ -1,7 +1,7 @@
 import axios from "axios";
 import {Measurement} from "../Measurement/Measurement";
 // TODO: read this from env
-const backendURL = "http://localhost:8000";
+const backendURL = "http://localhost:9000";
 const measurementsPath = "/measurements";
 
 interface measurementsAPIResponse {
