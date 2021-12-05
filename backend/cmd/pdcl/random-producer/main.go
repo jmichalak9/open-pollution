@@ -57,20 +57,34 @@ type randomOPMessageProducer struct {
 func (r *randomOPMessageProducer) run() {
 	for {
 		o3 := rand.Int63n(100)
+		temp := rand.Int63n(50) - 20
 		time.Sleep(1 * time.Second)
 		message := &pb.Message{
 			MeasureTime: timestamppb.Now(),
 			Location: &pb.Location{
-				Latitude:   rand.NormFloat64() * 90,
-				Longtitude: rand.NormFloat64() * 180,
+				Latitude:   rand.NormFloat64() + 52,
+				Longtitude: rand.NormFloat64() + 21,
 			},
-			O3Level: &o3,
+			O3Level:     &o3,
+			Temperature: &temp,
+		}
+		if rand.Float64() > 0.7 {
+			so2 := rand.Int63n(100)
+			message.SO2Level = &so2
+		}
+		if rand.Float64() > 0.7 {
+			pm10 := rand.Int63n(100)
+			message.PM10Level = &pm10
+		}
+		if rand.Float64() > 0.7 {
+			pm25 := rand.Int63n(100)
+			message.PM25Level = &pm25
 		}
 		log.Info().Time("measure_time", message.MeasureTime.AsTime()).Msg("produced message")
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 		if err := r.producer.Produce(ctx, message); err != nil {
 			log.Fatal().Err(err).Msg("error producing message")
 		}
-		cancel()
 	}
 }

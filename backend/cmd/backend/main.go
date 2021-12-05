@@ -92,18 +92,27 @@ func setupPDCL(cache measurement.Cache, config Config) {
 				return fmt.Errorf("unmarshall message: %w", err)
 			}
 
-			if message.O3Level == nil {
-				log.Info().Msg("skipping message with unset O3 level")
-				return nil
-			}
-
 			mes := measurement.Measurement{
 				Position: measurement.Position{
 					Lat:  message.Location.Latitude,
 					Long: message.Location.Longtitude,
 				},
 				Timestamp: message.MeasureTime.AsTime(),
-				O3:        int(*message.O3Level),
+			}
+			if message.O3Level != nil {
+				mes.O3 = int(*message.O3Level)
+			}
+			if message.SO2Level != nil {
+				mes.SO2 = int(*message.SO2Level)
+			}
+			if message.PM10Level != nil {
+				mes.PM10 = int(*message.PM10Level)
+			}
+			if message.PM25Level != nil {
+				mes.PM25 = int(*message.PM25Level)
+			}
+			if message.Temperature != nil {
+				mes.Temperature = int(*message.Temperature)
 			}
 			cache.AppendMeasurements([]measurement.Measurement{mes})
 			log.Info().Msgf("received %+v", mes)
