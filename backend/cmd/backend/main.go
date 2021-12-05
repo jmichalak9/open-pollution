@@ -9,18 +9,19 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/areknoster/public-distributed-commit-log/cmd/openpollution/pb"
 	"github.com/areknoster/public-distributed-commit-log/consumer"
-	"github.com/areknoster/public-distributed-commit-log/head/memory"
-	"github.com/areknoster/public-distributed-commit-log/head/sentinel_reader"
 	"github.com/areknoster/public-distributed-commit-log/sentinel/sentinelpb"
 	"github.com/areknoster/public-distributed-commit-log/storage"
 	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
+	"github.com/areknoster/public-distributed-commit-log/thead/memory"
+	"github.com/areknoster/public-distributed-commit-log/thead/sentinel_reader"
 	"github.com/ipfs/go-cid"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
+	"github.com/jmichalak9/open-pollution/cmd/pdcl"
+	"github.com/jmichalak9/open-pollution/cmd/pdcl/pb"
 	"github.com/jmichalak9/open-pollution/server"
 	"github.com/jmichalak9/open-pollution/server/measurement"
 )
@@ -29,6 +30,7 @@ type Config struct {
 	Address  string `envconfig:"ADDRESS" required:"true"`
 	PDCLHost string `envconfig:"PDCL_HOST" required:"true"`
 	PDCLPort string `envconfig:"PDCL_PORT" required:"true"`
+	pdcl.LocalStorageConfig
 }
 
 func main() {
@@ -56,12 +58,7 @@ func setupPDCL(cache measurement.Cache, config Config) {
 	sentinelClient := sentinelpb.NewSentinelClient(conn)
 	sentinelHeadReader := sentinel_reader.NewSentinelHeadReader(sentinelClient)
 	consumerOffsetManager := memory.NewHeadManager(cid.Undef)
-	// TODO: make this configurable
-	dirname, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal().Err(err).Msg("reading user home directory")
-	}
-	fsStorage, err := localfs.NewStorage(dirname + "/.local/share/pdcl/storage")
+	fsStorage, err := localfs.NewStorage(config.Directory)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't initialize storage")
 	}
@@ -94,11 +91,19 @@ func setupPDCL(cache measurement.Cache, config Config) {
 			if err := unmarshallable.Unmarshall(message); err != nil {
 				return fmt.Errorf("unmarshall message: %w", err)
 			}
-			type pdclMeasurement struct {
-				PollutionLevel float32 `json:"pollutionLevel"`
+
+			if message.O3Level == nil {
+				log.Info().Msg("skipping message with unset O3 level")
+				return nil
 			}
+
 			mes := measurement.Measurement{
-				O3: int(message.PollutionLevel),
+				Position: measurement.Position{
+					Lat:  message.Location.Latitude,
+					Long: message.Location.Longtitude,
+				},
+				Timestamp: message.MeasureTime.AsTime(),
+				O3:        int(*message.O3Level),
 			}
 			cache.AppendMeasurements([]measurement.Measurement{mes})
 			log.Info().Msgf("received %+v", mes)
@@ -107,5 +112,4 @@ func setupPDCL(cache measurement.Cache, config Config) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("consuming messages")
 	}
-
 }

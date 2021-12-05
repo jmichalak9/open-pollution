@@ -1,9 +1,10 @@
 package measurement_test
 
 import (
-	"github.com/jmichalak9/open-pollution/server/measurement"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/jmichalak9/open-pollution/server/measurement"
 )
 
 var _ = Describe("InMemoryCache", func() {
@@ -39,5 +40,4 @@ var _ = Describe("InMemoryCache", func() {
 
 		Expect(cache.GetMeasurements()).To(Equal(allMeasurements))
 	})
-
 })
