@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  openpollution-backend:
+    build:
+      context: ./backend
+    ports:
+      - "9000:9000"
+    restart: always
+    environment:
+      ADDRESS: 0.0.0.0:9000
+      PDCL_HOST: host.docker.internal
+      PDCL_PORT: 8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+        - ~/.local/share/pdcl/storage:/.local/share/pdcl/storage
+  openpollution-ui:
+    build:
+      context: ./ui
+    ports:
+      - "3000:80"
+    restart: always
