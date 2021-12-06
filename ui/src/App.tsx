@@ -8,17 +8,9 @@ import DetailView from "./DetailView/DetailView";
 import {Measurement} from "./Measurement/Measurement";
 import {getMeasurements} from "./APIClient/APIClient";
 
-const mockMeasurement1: Measurement = {
-  temperature: 42,
-  levelPM10: 33.3,
-  position: {
-    lat: 52.2,
-    long: 21.0,
-  }
-};
 
 const mockDetails = {
-  measurement: mockMeasurement1,
+  measurement: {} as Measurement,
 };
 
 function App() {
