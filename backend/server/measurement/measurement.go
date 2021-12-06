@@ -7,9 +7,13 @@ import (
 )
 
 type Measurement struct {
-	Position  Position  `json:"position"`
-	Timestamp time.Time `json:"timestamp"`
-	O3        int       `json:"levelO3"`
+	Position    Position  `json:"position"`
+	Timestamp   time.Time `json:"timestamp"`
+	O3          int       `json:"levelO3,omitempty"`
+	PM10        int       `json:"levelPM10,omitempty"`
+	PM25        int       `json:"levelPM25,omitempty"`
+	Temperature int       `json:"temperature,omitempty"`
+	SO2         int       `json:"levelSO2,omitempty"`
 }
 
 type Position struct {

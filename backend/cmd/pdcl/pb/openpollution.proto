@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option go_package = "./;pb";
+package openpollution;
 
 import "google/protobuf/timestamp.proto";
 
-package openpollution;
+option go_package = "./;pb";
 
 message Location {
   double latitude = 1;
@@ -12,7 +12,11 @@ message Location {
 }
 
 message Message {
-    google.protobuf.Timestamp measure_time = 1;
-    Location location = 2;
-    optional int64 O3_level = 3;
+  google.protobuf.Timestamp measure_time = 1;
+  Location location = 2;
+  optional int64 O3_level = 3;
+  optional int64 temperature = 4;
+  optional int64 PM10_level = 5;
+  optional int64 PM25_level = 6;
+  optional int64 SO2_level = 7;
 }

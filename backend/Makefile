@@ -16,7 +16,7 @@ lint:
 	golangci-lint run
 
 run:
-	PDCL_LOCAL_DIRECTORY="~/.local/share/pdcl/storage" ADDRESS="0.0.0.0:9000" PDCL_HOST="localhost" PDCL_PORT="8000" go run cmd/backend/main.go
+	PDCL_LOCAL_DIRECTORY="${HOME}/.local/share/pdcl/storage" ADDRESS="0.0.0.0:9000" PDCL_HOST="localhost" PDCL_PORT="8000" go run cmd/backend/main.go
 
 test:
 	go test -v ./...
@@ -27,4 +27,7 @@ coverage_profile:
 show_coverage:
 	go tool cover -html profile.coverprofile
 
-.PHONY: install-go-tools format lint run coverage_profile show_coverage
+reset_storage:
+	rm -rf ${HOME}/.local/share/pdcl/storage/*
+
+.PHONY: install-go-tools format lint run coverage_profile show_coverage reset_storage
