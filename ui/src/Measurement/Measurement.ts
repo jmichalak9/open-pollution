@@ -1,6 +1,6 @@
 export interface Measurement {
   readonly position: Position;
-  readonly timestamp?: Date;
+  readonly timestamp: Date;
   readonly temperature?: number;
   readonly levelPM10?: number;
   readonly levelPM25?: number;

@@ -30,7 +30,8 @@ export async function getMeasurements(callback: Function) {
         position: {
           lat: data[i].position.lat,
           long: data[i].position.long,
-        }
+        },
+        timestamp: new Date(data[i].timestamp),
       };
       measurements.push(m)
     }

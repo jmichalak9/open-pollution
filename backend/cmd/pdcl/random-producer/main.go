@@ -54,30 +54,39 @@ type randomOPMessageProducer struct {
 	producer producer.Producer
 }
 
+const (
+	warsawLat   = 52
+	warsawLong  = 21
+	maxLevel    = 100
+	levelChance = 0.7
+	tempMin     = -20
+	tempMax     = 30
+)
+
 func (r *randomOPMessageProducer) run() {
 	for {
-		o3 := rand.Int63n(100)
-		temp := rand.Int63n(50) - 20
+		o3 := rand.Int63n(maxLevel)
+		temp := rand.Int63n(tempMax-tempMin) - tempMin
 		time.Sleep(1 * time.Second)
 		message := &pb.Message{
 			MeasureTime: timestamppb.Now(),
 			Location: &pb.Location{
-				Latitude:   rand.NormFloat64() + 52,
-				Longtitude: rand.NormFloat64() + 21,
+				Latitude:   rand.NormFloat64() + warsawLat,
+				Longtitude: rand.NormFloat64() + warsawLong,
 			},
 			O3Level:     &o3,
 			Temperature: &temp,
 		}
-		if rand.Float64() > 0.7 {
-			so2 := rand.Int63n(100)
+		if rand.Float64() < levelChance {
+			so2 := rand.Int63n(maxLevel)
 			message.SO2Level = &so2
 		}
-		if rand.Float64() > 0.7 {
-			pm10 := rand.Int63n(100)
+		if rand.Float64() < levelChance {
+			pm10 := rand.Int63n(maxLevel)
 			message.PM10Level = &pm10
 		}
-		if rand.Float64() > 0.7 {
-			pm25 := rand.Int63n(100)
+		if rand.Float64() < levelChance {
+			pm25 := rand.Int63n(maxLevel)
 			message.PM25Level = &pm25
 		}
 		log.Info().Time("measure_time", message.MeasureTime.AsTime()).Msg("produced message")
