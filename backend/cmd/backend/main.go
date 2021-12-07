@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/areknoster/public-distributed-commit-log/consumer"
@@ -40,14 +42,39 @@ func main() {
 	}
 	measurementCache := measurement.NewInMemoryCache(measurement.ExampleMeasurements)
 	srv := server.NewServer(config.Address, measurementCache)
-	go setupPDCL(measurementCache, config)
-	err := srv.Run()
-	if err != nil && err != http.ErrServerClosed {
-		log.Fatal().Err(err).Msg("server failed")
+	ctx, cancelPDCL := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
+	go func() {
+		wg.Add(1)
+		setupPDCL(ctx, measurementCache, config)
+	}()
+
+	go func() {
+		wg.Add(1)
+		err := srv.Run()
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatal().Err(err).Msg("server failed")
+		}
+	}()
+	waitForShutdown()
+	cancelPDCL()
+	wg.Done()
+	if err := srv.Shutdown(); err != nil {
+		log.Error().Err(err).Msg("failed to shut down")
 	}
+	wg.Done()
+	wg.Wait()
+	log.Debug().Msg("server stopped")
 }
 
-func setupPDCL(cache measurement.Cache, config Config) {
+func waitForShutdown() {
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+	<-signalCh
+	log.Debug().Msg("interruption signal received")
+}
+
+func setupPDCL(ctx context.Context, cache measurement.Cache, config Config) {
 	conn, err := grpc.Dial(
 		net.JoinHostPort(config.PDCLHost, config.PDCLPort),
 		grpc.WithInsecure(),
@@ -74,18 +101,7 @@ func setupPDCL(cache measurement.Cache, config Config) {
 			PollTimeout:  100 * time.Second,
 		})
 
-	c := make(chan os.Signal, 1)
-	globalCtx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	signal.Notify(c, os.Interrupt)
-	// TODO: graceful shutdown
-	defer signal.Stop(c)
-	go func() {
-		for range c {
-			cancel()
-		}
-	}()
-	err = firstToLastConsumer.Consume(globalCtx, consumer.MessageFandlerFunc(
+	err = firstToLastConsumer.Consume(ctx, consumer.MessageFandlerFunc(
 		func(ctx context.Context, unmarshallable storage.ProtoUnmarshallable) error {
 			message := &pb.Message{}
 			if err := unmarshallable.Unmarshall(message); err != nil {
@@ -118,6 +134,7 @@ func setupPDCL(cache measurement.Cache, config Config) {
 			log.Info().Msgf("received %+v", mes)
 			return nil
 		}))
+	log.Debug().Msg("server stopped consuming messages")
 	if err != nil {
 		log.Fatal().Err(err).Msg("consuming messages")
 	}

@@ -1,8 +1,10 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -43,4 +45,11 @@ func (s *Server) handleMeasurements() http.HandlerFunc {
 
 func (s *Server) Run() error {
 	return s.httpServer.ListenAndServe()
+}
+
+func (s *Server) Shutdown() error {
+	log.Debug().Msg("server shutting down")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return s.httpServer.Shutdown(ctx)
 }
