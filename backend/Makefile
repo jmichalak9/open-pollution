@@ -8,6 +8,9 @@ generate-code: | generate-go-code format
 generate-go-code:
 	go generate ./...
 
+generate-mocks:
+	cd server/measurement && mockgen -source cache.go -destination cache_mock.go -package measurement
+
 format:
 	gofumpt -w .
 	gci -w -local github.com/jmichalak9/open-pollution . 1>/dev/null
@@ -30,4 +33,4 @@ show_coverage:
 reset_storage:
 	rm -rf ${HOME}/.local/share/pdcl/storage/*
 
-.PHONY: install-go-tools format lint run coverage_profile show_coverage reset_storage
+.PHONY: install-go-tools format lint run coverage_profile show_coverage reset_storage generate-mocks

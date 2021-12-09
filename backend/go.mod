@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/areknoster/public-distributed-commit-log v1.0.0
 	github.com/daixiang0/gci v0.2.9
+	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.43.0
 	github.com/ipfs/go-cid v0.1.0
 	github.com/kelseyhightower/envconfig v1.4.0
