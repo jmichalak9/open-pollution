@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import { useAlert } from 'react-alert';
 
 import LeftPanel from './LeftPanel/LeftPanel';
 import Map, {MapData} from './Map/Map';
@@ -14,6 +15,7 @@ const mockDetails = {
 };
 
 function App() {
+  const alert = useAlert();
   // @ts-ignore
   const [details, setDetails] = useState(mockDetails);
   const [measurements, setMeasurements] = useState<MapData>( {
@@ -35,6 +37,8 @@ function App() {
           measurements: m,
         }
         setMeasurements(measurements);
+      }, () => {
+        alert.show('Nie udało się pobrać danych!')
       });
     };
     return x;
