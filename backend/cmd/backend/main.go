@@ -16,7 +16,7 @@ import (
 	"github.com/areknoster/public-distributed-commit-log/storage"
 	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
 	"github.com/areknoster/public-distributed-commit-log/thead/memory"
-	"github.com/areknoster/public-distributed-commit-log/thead/sentinel_reader"
+	sentinelhead "github.com/areknoster/public-distributed-commit-log/thead/sentinel"
 	"github.com/ipfs/go-cid"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
@@ -83,7 +83,7 @@ func setupPDCL(ctx context.Context, cache measurement.Cache, config Config) {
 		log.Fatal().Err(err).Msg("can't connect to sentinel")
 	}
 	sentinelClient := sentinelpb.NewSentinelClient(conn)
-	sentinelHeadReader := sentinel_reader.NewSentinelHeadReader(sentinelClient)
+	sentinelHeadReader := sentinelhead.New(sentinelClient)
 	consumerOffsetManager := memory.NewHeadManager(cid.Undef)
 	fsStorage, err := localfs.NewStorage(config.Directory)
 	if err != nil {
@@ -101,7 +101,7 @@ func setupPDCL(ctx context.Context, cache measurement.Cache, config Config) {
 			PollTimeout:  100 * time.Second,
 		})
 
-	err = firstToLastConsumer.Consume(ctx, consumer.MessageFandlerFunc(
+	err = firstToLastConsumer.Consume(ctx, consumer.MessageHandlerFunc(
 		func(ctx context.Context, unmarshallable storage.ProtoUnmarshallable) error {
 			message := &pb.Message{}
 			if err := unmarshallable.Unmarshall(message); err != nil {
