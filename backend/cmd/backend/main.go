@@ -16,7 +16,7 @@ import (
 	"github.com/areknoster/public-distributed-commit-log/storage"
 	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
 	"github.com/areknoster/public-distributed-commit-log/thead/memory"
-	sentinelhead "github.com/areknoster/public-distributed-commit-log/thead/sentinel"
+	"github.com/areknoster/public-distributed-commit-log/thead/sentinelhead"
 	"github.com/ipfs/go-cid"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
@@ -40,7 +40,7 @@ func main() {
 	if err := envconfig.Process("", &config); err != nil {
 		log.Fatal().Err(err).Msg("can't process environment variables for config")
 	}
-	measurementCache := measurement.NewInMemoryCache(measurement.ExampleMeasurements)
+	measurementCache := measurement.NewInMemoryCache([]measurement.Measurement{})
 	srv := server.NewServer(config.Address, measurementCache)
 	ctx, cancelPDCL := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}
