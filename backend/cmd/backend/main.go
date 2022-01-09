@@ -17,10 +17,12 @@ import (
 	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
 	"github.com/areknoster/public-distributed-commit-log/thead/memory"
 	"github.com/areknoster/public-distributed-commit-log/thead/sentinelhead"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/ipfs/go-cid"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 
 	"github.com/jmichalak9/open-pollution/cmd/pdcl"
 	"github.com/jmichalak9/open-pollution/cmd/pdcl/pb"
@@ -33,6 +35,13 @@ type Config struct {
 	PDCLHost string `envconfig:"PDCL_HOST" required:"true"`
 	PDCLPort string `envconfig:"PDCL_PORT" required:"true"`
 	pdcl.LocalStorageConfig
+	GRPCConfig
+}
+
+type GRPCConfig struct {
+	MaxRetries     uint `envconfig:"GRPC_MAX_RETRIES" default:"10"`
+	BackoffSeconds int  `envconfig:"GRPC_BACKOFF_SEC" default:"5"`
+	Exponential    bool `envconfig:"GRPC_BACKOFF_EXPONENTIAL" default:"true"`
 }
 
 func main() {
@@ -75,9 +84,24 @@ func waitForShutdown() {
 }
 
 func setupPDCL(ctx context.Context, cache measurement.Cache, config Config) {
+	var backoffFunc grpc_retry.BackoffFunc
+	if config.GRPCConfig.Exponential {
+		backoffFunc = grpc_retry.BackoffExponential(
+			time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
+	} else {
+		backoffFunc = grpc_retry.BackoffLinear(
+			time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
+	}
+	opts := []grpc_retry.CallOption{
+		grpc_retry.WithMax(config.GRPCConfig.MaxRetries),
+		grpc_retry.WithBackoff(backoffFunc),
+		grpc_retry.WithPerRetryTimeout(20 * time.Second),
+		grpc_retry.WithCodes(codes.DeadlineExceeded, codes.ResourceExhausted, codes.Unavailable),
+	}
 	conn, err := grpc.Dial(
 		net.JoinHostPort(config.PDCLHost, config.PDCLPort),
 		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(opts...)),
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't connect to sentinel")
