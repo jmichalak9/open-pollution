@@ -10,9 +10,11 @@ import (
 	"github.com/areknoster/public-distributed-commit-log/sentinel/sentinelpb"
 	"github.com/areknoster/public-distributed-commit-log/storage"
 	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/jmichalak9/open-pollution/cmd/pdcl"
@@ -23,6 +25,13 @@ type Config struct {
 	Host string `envconfig:"SENTINEL_SERVICE_HOST" default:"localhost"`
 	Port string `envconfig:"SENTINEL_SERVICE_PORT" default:"8000"`
 	pdcl.LocalStorageConfig
+	GRPCConfig
+}
+
+type GRPCConfig struct {
+	MaxRetries     uint `envconfig:"GRPC_MAX_RETRIES" default:"10"`
+	BackoffSeconds int  `envconfig:"GRPC_BACKOFF_SEC" default:"5"`
+	Exponential    bool `envconfig:"GRPC_BACKOFF_EXPONENTIAL" default:"true"`
 }
 
 func main() {
@@ -37,9 +46,24 @@ func main() {
 	}
 	messageStorage := storage.NewProtoMessageStorage(contentStorage)
 
+	var backoffFunc grpc_retry.BackoffFunc
+	if config.GRPCConfig.Exponential {
+		backoffFunc = grpc_retry.BackoffExponential(
+			time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
+	} else {
+		backoffFunc = grpc_retry.BackoffLinear(
+			time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
+	}
+	opts := []grpc_retry.CallOption{
+		grpc_retry.WithMax(config.GRPCConfig.MaxRetries),
+		grpc_retry.WithBackoff(backoffFunc),
+		grpc_retry.WithPerRetryTimeout(20 * time.Second),
+		grpc_retry.WithCodes(codes.DeadlineExceeded, codes.ResourceExhausted, codes.Unavailable),
+	}
 	conn, err := grpc.Dial(
 		net.JoinHostPort(config.Host, config.Port),
 		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(opts...)),
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't connect to sentinel")
@@ -90,8 +114,8 @@ func (r *randomOPMessageProducer) run() {
 			message.PM25Level = &pm25
 		}
 		log.Info().Time("measure_time", message.MeasureTime.AsTime()).Msg("produced message")
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
+		// Request context deadline is managed by gRPC client.
+		ctx := context.Background()
 		if err := r.producer.Produce(ctx, message); err != nil {
 			log.Fatal().Err(err).Msg("error producing message")
 		}
