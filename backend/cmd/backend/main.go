@@ -12,19 +12,21 @@ import (
 	"time"
 
 	"github.com/areknoster/public-distributed-commit-log/consumer"
+	pdclcrypto "github.com/areknoster/public-distributed-commit-log/crypto"
+	"github.com/areknoster/public-distributed-commit-log/ipns"
 	"github.com/areknoster/public-distributed-commit-log/sentinel/sentinelpb"
 	"github.com/areknoster/public-distributed-commit-log/storage"
-	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
+	ipfsstorage "github.com/areknoster/public-distributed-commit-log/storage/message/ipfs"
+	"github.com/areknoster/public-distributed-commit-log/storage/pbcodec"
 	"github.com/areknoster/public-distributed-commit-log/thead/memory"
-	"github.com/areknoster/public-distributed-commit-log/thead/sentinelhead"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/ipfs/go-cid"
+	shell "github.com/ipfs/go-ipfs-api"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"github.com/jmichalak9/open-pollution/cmd/pdcl"
 	"github.com/jmichalak9/open-pollution/cmd/pdcl/pb"
 	"github.com/jmichalak9/open-pollution/server"
 	"github.com/jmichalak9/open-pollution/server/measurement"
@@ -34,7 +36,8 @@ type Config struct {
 	Address  string `envconfig:"ADDRESS" required:"true"`
 	PDCLHost string `envconfig:"PDCL_HOST" required:"true"`
 	PDCLPort string `envconfig:"PDCL_PORT" required:"true"`
-	pdcl.LocalStorageConfig
+	IPFSPort string `envconfig:"IPFS_PORT" required:"true"`
+	IPFSHost string `envconfig:"IPFS_HOST" required:"true"`
 	GRPCConfig
 }
 
@@ -103,27 +106,38 @@ func setupPDCL(ctx context.Context, cache measurement.Cache, config Config) {
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(opts...)),
 	)
+	sentinelClient := sentinelpb.NewSentinelClient(conn)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't connect to sentinel")
 	}
-	sentinelClient := sentinelpb.NewSentinelClient(conn)
-	sentinelHeadReader := sentinelhead.New(sentinelClient)
+	resp, err := sentinelClient.GetHeadIPNS(context.Background(), &sentinelpb.GetHeadIPNSRequest{})
+	if err != nil {
+		log.Fatal().Err(err).Msg("getting ipns address")
+	}
+	log.Info().Msgf("IPNS head address is %s", resp.IpnsAddr)
+	if resp.IpnsAddr == "" {
+		log.Fatal().Msg("could not get valid IPNS address from sentinel")
+	}
 	consumerOffsetManager := memory.NewHeadManager(cid.Undef)
-	fsStorage, err := localfs.NewStorage(config.Directory)
 	if err != nil {
 		log.Fatal().Err(err).Msg("can't initialize storage")
 	}
-	messageStorage := storage.NewProtoMessageStorage(fsStorage)
+
+	shell := shell.NewShell(fmt.Sprintf("%s:%s", config.IPFSHost, config.IPFSPort))
+	ipnsResolver := ipns.NewIPNSResolver(shell)
+	reader := ipfsstorage.NewStorage(shell, pbcodec.Json{})
 
 	firstToLastConsumer := consumer.NewFirstToLastConsumer(
-		sentinelHeadReader,
 		consumerOffsetManager,
-		messageStorage,
+		reader,
+		pdclcrypto.NewSignedMessageUnwrapper(reader, pbcodec.Json{}),
 		consumer.FirstToLastConsumerConfig{
-			// TODO: these should be configurable
-			PollInterval: 10 * time.Second,
-			PollTimeout:  100 * time.Second,
-		})
+			PollInterval: 20 * time.Second,
+			PollTimeout:  20 * time.Second,
+			IPNSAddr:     resp.IpnsAddr,
+		},
+		ipnsResolver,
+	)
 
 	err = firstToLastConsumer.Consume(ctx, consumer.MessageHandlerFunc(
 		func(ctx context.Context, unmarshallable storage.ProtoUnmarshallable) error {

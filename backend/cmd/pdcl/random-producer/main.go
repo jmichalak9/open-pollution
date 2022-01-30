@@ -3,18 +3,10 @@ package main
 import (
 	"context"
 	"math/rand"
-	"net"
 	"time"
 
 	"github.com/areknoster/public-distributed-commit-log/producer"
-	"github.com/areknoster/public-distributed-commit-log/sentinel/sentinelpb"
-	"github.com/areknoster/public-distributed-commit-log/storage"
-	"github.com/areknoster/public-distributed-commit-log/storage/localfs"
-	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/jmichalak9/open-pollution/cmd/pdcl"
@@ -35,43 +27,43 @@ type GRPCConfig struct {
 }
 
 func main() {
-	config := Config{}
-	if err := envconfig.Process("", &config); err != nil {
-		log.Fatal().Err(err).Msg("can't process environment variables for config")
-	}
+	// config := Config{}
+	// if err := envconfig.Process("", &config); err != nil {
+	// 	log.Fatal().Err(err).Msg("can't process environment variables for config")
+	// }
 
-	contentStorage, err := localfs.NewStorage(config.Directory)
-	if err != nil {
-		log.Fatal().Err(err).Msg("can't initialize contentStorage")
-	}
-	messageStorage := storage.NewProtoMessageStorage(contentStorage)
+	// contentStorage, err := localfs.NewStorage(config.Directory)
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("can't initialize contentStorage")
+	// }
+	// messageStorage := storage.NewProtoMessageStorage(contentStorage)
 
-	var backoffFunc grpc_retry.BackoffFunc
-	if config.GRPCConfig.Exponential {
-		backoffFunc = grpc_retry.BackoffExponential(
-			time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
-	} else {
-		backoffFunc = grpc_retry.BackoffLinear(
-			time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
-	}
-	opts := []grpc_retry.CallOption{
-		grpc_retry.WithMax(config.GRPCConfig.MaxRetries),
-		grpc_retry.WithBackoff(backoffFunc),
-		grpc_retry.WithPerRetryTimeout(20 * time.Second),
-		grpc_retry.WithCodes(codes.DeadlineExceeded, codes.ResourceExhausted, codes.Unavailable),
-	}
-	conn, err := grpc.Dial(
-		net.JoinHostPort(config.Host, config.Port),
-		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(opts...)),
-	)
-	if err != nil {
-		log.Fatal().Err(err).Msg("can't connect to sentinel")
-	}
-	sentinelClient := sentinelpb.NewSentinelClient(conn)
-	messageProducer := producer.NewMessageProducer(messageStorage, sentinelClient)
-	r := randomOPMessageProducer{producer: messageProducer}
-	r.run()
+	// var backoffFunc grpc_retry.BackoffFunc
+	// if config.GRPCConfig.Exponential {
+	// 	backoffFunc = grpc_retry.BackoffExponential(
+	// 		time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
+	// } else {
+	// 	backoffFunc = grpc_retry.BackoffLinear(
+	// 		time.Duration(config.GRPCConfig.BackoffSeconds) * time.Second)
+	// }
+	// opts := []grpc_retry.CallOption{
+	// 	grpc_retry.WithMax(config.GRPCConfig.MaxRetries),
+	// 	grpc_retry.WithBackoff(backoffFunc),
+	// 	grpc_retry.WithPerRetryTimeout(20 * time.Second),
+	// 	grpc_retry.WithCodes(codes.DeadlineExceeded, codes.ResourceExhausted, codes.Unavailable),
+	// }
+	// conn, err := grpc.Dial(
+	// 	net.JoinHostPort(config.Host, config.Port),
+	// 	grpc.WithInsecure(),
+	// 	grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(opts...)),
+	// )
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("can't connect to sentinel")
+	// }
+	// sentinelClient := sentinelpb.NewSentinelClient(conn)
+	// messageProducer := producer.NewMessageProducer(messageStorage, sentinelClient)
+	// r := randomOPMessageProducer{producer: messageProducer}
+	// r.run()
 }
 
 type randomOPMessageProducer struct {
