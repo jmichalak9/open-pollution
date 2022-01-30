@@ -140,9 +140,9 @@ func setupPDCL(ctx context.Context, cache measurement.Cache, config Config) {
 	)
 
 	err = firstToLastConsumer.Consume(ctx, consumer.MessageHandlerFunc(
-		func(ctx context.Context, unmarshallable storage.ProtoUnmarshallable) error {
+		func(ctx context.Context, decodable storage.ProtoDecodable) error {
 			message := &pb.Message{}
-			if err := unmarshallable.Unmarshall(message); err != nil {
+			if err := decodable.Decode(message); err != nil {
 				return fmt.Errorf("unmarshall message: %w", err)
 			}
 
