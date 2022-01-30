@@ -2,8 +2,8 @@ resource "null_resource" "add-ipfs-image" {
   provisioner "local-exec" {
     command = <<-EOT
       docker pull ipfs/go-ipfs:${local.ipfs-image-tag}
-      docker tag ipfs/go-ipfs:${local.ipfs-image-tag} eu.gcr.io/pdcl-testing/go-ipfs:${local.ipfs-image-tag}
-      docker push  eu.gcr.io/pdcl-testing/go-ipfs:${local.ipfs-image-tag}
+      docker tag ipfs/go-ipfs:${local.ipfs-image-tag} eu.gcr.io/open-pollution/go-ipfs:${local.ipfs-image-tag}
+      docker push  eu.gcr.io/open-pollution/go-ipfs:${local.ipfs-image-tag}
     EOT
   }
 }
@@ -21,7 +21,7 @@ module "ipfs-node" {
 }
 
 module "sentinel" {
-  source = "../../modules/gcp/gce_sentinel"
+  source = "git::https://github.com/areknoster/public-distributed-commit-log.git//terraform/modules/gcp/gce_sentinel?ref=v1.3.0"
 
   ipfs-node-self-link = module.ipfs-node.ipfs-node-instance.self_link
   registry_bucket_id  = google_container_registry.registry.id
