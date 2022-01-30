@@ -1,6 +1,6 @@
 import axios from "axios";
 import {Measurement} from "../Measurement/Measurement";
-const backendURL = process.env.REACT_APP_API_SERVER || "http://openpollution-backend:9000";
+const backendURL = process.env.REACT_APP_API_SERVER || "http://localhost:9000";
 console.log(backendURL);
 const measurementsPath = "/measurements";
 
