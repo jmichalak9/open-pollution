@@ -27,8 +27,8 @@ import (
 )
 
 type Config struct {
-	Host                     string `envconfig:"SENTINEL_HOST" required:"true"`
-	Port                     string `envconfig:"SENTINEL_PORT" required:"true"`
+	Host                     string `envconfig:"GRPC_HOST" required:"true"`
+	Port                     string `envconfig:"GRPC_PORT" required:"true"`
 	IPFSHost                 string `envconfig:"IPFS_HOST" default:"localhost"`
 	IPFSPort                 string `envconfig:"IPFS_PORT" default:"5001"`
 	ConcurrentProducerConfig producer.BasicConcurrentProducerConfig
