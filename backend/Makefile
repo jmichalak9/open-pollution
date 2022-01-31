@@ -18,15 +18,6 @@ format:
 lint:
 	golangci-lint run
 
-run:
-	PDCL_LOCAL_DIRECTORY="${HOME}/.local/share/pdcl/storage" ADDRESS="0.0.0.0:9000" PDCL_HOST="localhost" PDCL_PORT="8000" go run cmd/backend/main.go
-
-run_sentinel:
-	PDCL_LOCAL_DIRECTORY="${HOME}/.local/share/pdcl/storage" go run cmd/pdcl/sentinel/main.go
-
-run_producer:
-	PDCL_LOCAL_DIRECTORY="${HOME}/.local/share/pdcl/storage" go run cmd/pdcl/random-producer/main.go
-
 test:
 	go test -v ./...
 
@@ -39,4 +30,4 @@ show_coverage:
 reset_storage:
 	rm -rf ${HOME}/.local/share/pdcl/storage/*
 
-.PHONY: install-go-tools format lint run run_sentinel run_producer coverage_profile show_coverage reset_storage generate-mocks
+.PHONY: install-go-tools format lint coverage_profile show_coverage reset_storage generate-mocks
